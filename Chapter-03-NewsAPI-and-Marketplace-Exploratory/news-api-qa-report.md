@@ -1,67 +1,65 @@
+# Multi-Platform QA Architecture: News API Automation Engine & Live Marketplace Exploratory Testing Framework
 
-QA Assessment Summary Report: News API & Bikroy Website
+## 1. Project Overview & Testing Strategy
+This engineering module establishes a dual-scope QA architecture designed to validate production-grade software layers. The module contains a fully automated API validation suite executed directly against live cloud microservices and a manual exploratory testing workflow mapped onto a high-traffic e-commerce marketplace platform.
 
+*   **Technology Stack Deployed:** Postman Automation Framework, Asynchronous JavaScript Assertion Scripting, and Clean Variable Sandboxing.
+*   **Total Test Execution Vectors:** 7 Automated Request Models + 8 Structured User-Journey Manual Scenarios.
+*   **Production Gateways Tested Live:** `https://newsapi.org` and `https://bikroy.com`.
 
-1. Scope, Time Spent, Environment, and Testing Assumptions
+---
 
-• Scope: This assessment covers automated API validation for the live News API service using Postman, alongside manual exploratory UI testing on the public Bikroy marketplace website.
-• Time Spent: 2.5 hours of active test design and execution.
-• Environment:
-	• API Layer: Postman application connected to live endpoints at https://newsapi.org.
-	• UI Layer: Google Chrome browser running on a desktop Windows 11 environment visiting https://bikroy.com.
-• Testing Assumptions:
-	1. We assume the public News API server allows steady automation testing loops without hitting sudden rate limit blocks.
-	2. We assume the public flows on the Bikroy marketplace do not require a logged-in user profile to test the core search and location filtering systems.
+## 2. API Automation Architecture Blueprint (News API Framework)
 
-2. API Test Execution Summary (News API)
+The automated script engine isolates credentials safely via secure environment variables (`{{newsApiKey}}`) and executes multi-tier assertions verifying both network protocols and JSON-Schema data structures.
 
-• Total Test Requests Evaluated: 7 Cases (6 Required Suite Cases + 1 Optional Bonus Request)
-• Passed Status Matrix: 6 Requests executed with 100% assertion script clearance.
-• Failed Status Matrix: 1 Request (TC-NEWS-06 - Invalid Parameter Value) failed because a live contract discrepancy was caught.
-• Blocked / Not Run Status Matrix: 0
+### 🔹 Public Stream Discoveries (Positive Path Configurations)
+*   **Dynamic Article Aggregator Validation (`TC-NEWS-01`):** Sends requests to the search route targeting queries like `?q=technology`. The suite validates the server return profile (`HTTP 200 OK`) and parses dynamic article objects array keys (`title`, `url`, `publishedAt`) automatically to ensure structural updates do not break the test suite.
+*   **Curated Headline Analytics (`TC-NEWS-02`):** Implements localized geographical parameters (`country=us`) to check system filtering logic, validating the response envelope shape successfully without hardcoding dynamic content states.
+*   **Source Channel Identification (`TC-NEWS-07 - Bonus Track`):** Deployed a dedicated array inspector checking top headline distribution sources (`/v2/top-headlines/sources`) to map and verify communication metrics on dynamic media networks.
 
-3. Bikroy UI Scenarios Explored and Findings
+### 🔹 Security Access Safeguards & Validation Exceptions (Negative Paths)
+*   **Authentication Exclusions Monitor (`TC-NEWS-03`):** Intentionally blocks API key inclusion flags to verify backend defensive routing. The script validates that the remote gateway securely blocks the transaction with an `HTTP 401 Unauthorized` state code and logs a structured `apiKeyMissing` error signature.
+*   **Credential Spoof Interceptor (`TC-NEWS-04`):** Passes a fake testing credentials string layout (`invalid-test-key`). The test framework confirms the gateway catches the exploit and safely responds with a documented `apiKeyInvalid` client block.
+*   **Mandatory Field Incomplete Handler (`TC-NEWS-05`):** Bypasses the mandatory query parameters (`q`) to verify endpoint validation filters. The suite checks that the server intercepts the broken payload and responds with an explicit `parametersMissing` error envelope code.
 
-• Charter Target Mapping: Explored the platform as an anonymous buyer trying to discover a used phone in Dhaka.
-• Total UI Scenarios Logged: 8 Scenarios.
-• Passed Status Matrix: 7 Scenarios successfully validated that the home page loading, category filtering, subcategory layout mapping, location filtering to Dhaka, and detailed page views are highly stable.
-• Failed Status Matrix: 1 Scenario (SC-BIK-UI-08 - Whitespace Search Vector) failed due to missing text input validation filters.
+---
 
-4. Prioritized Issues and Contract Discrepancies
+## 3. Marketplace UI Behavioral Matrix & Defect Discovery (Bikroy Platform)
 
-Note: Below are the top two highest-priority observations recorded during live infrastructure execution, supported by real sanitized evidence.
+A structured exploratory testing execution session was managed under the operational charter: *"Analyze anonymous user discovery flows, regional filtering tools, and presentation data models across mobile inventory structures."* 
 
-Issue 01 (High Priority): Live API Contract Discrepancy on Invalid Sorting Parameter
+### 🔹 Deployed UI Scenario Logs & Integrity Tracking
+*   **Landing Layout & Visual Check (`SC-BIK-UI-01`):** Verified home screen presentation shapes, category navigator nodes, and language headers. The full UI resolves seamlessly under 2 seconds with zero broken frames.
+*   **Search Engine Retrieval Accuracy (`SC-BIK-UI-02`):** Input valid phone criteria words (`iPhone`). The platform dynamically sorts relevant ad grids based on text matching.
+*   **Deep Subcategory Routing Flow (`SC-BIK-UI-03` & `04`):** Tested multi-filter applications by navigating into **Mobiles -> Phones & Tablets** and locking the location sieve filter strictly to the **Dhaka** area. The catalog drops external listings instantly.
+*   **Data Consistency & Browser History (`SC-BIK-UI-05` & `06`):** Validated that individual listing detail panels present accurate metadata blocks (Title, explicit price fields, area info). Verified browser **Back/Forward** states operate cleanly without session timeouts.
+*   **Empty State Graceful Resolution (`SC-BIK-UI-07`):** Tested a mismatched random text sequence string (`xyznonexistentterm123`). The interface intercepts the query and shows a clean "No results found" panel display.
 
-• Title: The live microservice silently ignores invalid query parameters instead of returning a client error code.
-• Steps to Reproduce: Run a GET call to https://newsapi.org (TC-NEWS-06).
-• Expected Result: The server should return an HTTP 400 Bad Request code with a clear validation payload mapping parameterInvalid.
-• Actual Result: The live backend completely ignored the broken parameter value, used default sorting instead, and successfully returned an HTTP 200 OK response with article items.
-• Evidence: Recorded inside the Part A - News API Matrix spreadsheet layout matching your live execution parameters.
+---
 
-Issue 02 (Medium Priority): Missing Input Validation for Whitespace-Only Queries on Website Search Box
+## 4. Production Bug Identification & Architectural Discrepancies
 
-• Title: Submitting blank spaces inside the primary search entry bar bypasses text filtering constraints.
-• Steps to Reproduce:
-	1. Go to https://bikroy.com.
-	2. Click inside the search input box, press the spacebar exactly three times (   ), and press Enter.
-• Expected Result: The frontend layout should trim the blank string input and block the empty search request, displaying a clear validation popup warning like "Please enter a valid keyword to search".
-• Actual Result: The site executes a silent page reload and fetches all 298,103 raw listing results across All Bangladesh without showing any user alert messages.
-• Evidence: Verified screenshot proof saved inside the directory as scr-bikroy-whitespace-defect.png.
+The testing suite identified the following prioritized system errors during live production environments tracking execution:
 
-5. Remaining Risks and Gaps to Investigate Next
+### 🪲 Bug 01 (Medium Priority): Missing Input Validation for Whitespace-Only Marketplace Queries
+*   **Defect Signature:** Bypassing standard string trimming checks on search fields allows blank queries to trigger unneeded server calls.
+*   **Replication Steps:** Navigate to the main homepage search input bar, inject exactly three blank spaces (`q=   `), and press **Enter** (`SC-BIK-UI-08`).
+*   **Expected Secure Behavior:** The client application layer should catch the blank entry string block, stop the empty payload refresh, and present a clear input warning message like *"Please enter a valid keyword to search"*.
+*   **Live Actual Behavior:** The interface fails to catch the whitespace query and executes a full page refresh, fetching 298,103 raw database ads across All Bangladesh without alerting the user.
+*   **Evidence Asset Captured:** Visual proof logged and uploaded as `scr-bikroy-whitespace-defect.png`.
+*   **Status Classification:** **FAILED (Defect Confirmed)**
 
-• Remaining Risk: There is a threat of database performance lag or extreme response delay if users search using mixed character styles or complex localized languages (like raw Bangla Unicode text streams) that bypass initial sanitation filters.
-• Next 3 Tests to Run with More Time:
-	1. API Concurrency Load Test: Run multiple automation loops at the max limit of 50 records to evaluate server performance behavior under traffic load.
-	2. String Length Overflow Boundary Test: Input a long text value string exceeding 100 characters in parameter q to see if the system truncates it safely without internal errors.
-	3. Conflicting Query Argument Test: Pass contradictory parameters simultaneously (like two different location parameters together) to review how the query parser decides priority.
+### 🪲 Bug 02 (Low Priority): API Contract Drift on Invalid Sorting Filter Configuration
+*   **Defect Signature:** Live microservice architecture silently ignores unsupported arguments instead of returning clean boundary client errors.
+*   **Replication Steps:** Dispatch a `GET` request to `https://newsapi.orgeverything?q=apple&sortBy=invalidSortParam` (`TC-NEWS-06`).
+*   **Expected Secure Behavior:** Server should return an `HTTP 400 Bad Request` mapping out an explicit `parameterInvalid` code payload.
+*   **Live Actual Behavior:** The backend completely bypassed the invalid sorting string argument, fell back to default sorting parameters, and processed the call as a successful `HTTP 200 OK` transaction loop.
+*   **Status Classification:** **FAILED (Contract Drift Caught)**
 
-6. 5-Minute Walkthrough of One Postman Request
+---
 
-• Selected Target Request: TC-NEWS-01 - Search articles - valid request
-• Configuration Setup: The request is mapped via GET targeting the endpoint https://newsapi.org. The collection safely manages the secret authentication token via a dynamic global header parameter ({{newsApiKey}}) at the collection root layer.
-• Assertion Breakdown & Business Logic:
-	• Status code is 200 OK: Asserts that the cloud server transaction connection is fully active.
-	• Response contains valid envelope structure and types: A critical script that double-checks data shapes to confirm status returns "ok", articles is an array layout, and counters map to numbers. Validating data types instead of hardcoded numbers ensures that the test suites stay stable and do not fail just because live news content updates.
-• Live Finding Result Walkthrough: During runtime execution, all 6 automated test assertions successfully turned green (PASSED). This confirms that our Postman test framework handles dynamic, changing data structures correctly while successfully keeping secret parameters completely separate from the collection files.
+## 5. Next Steps & Advanced Testing Roadmap
+1.  **Automated Security Key Leak Scanning:** Integrate automated token scanner actions into pre-commit validation chains to ensure configuration credentials are never hardcoded inside repository code text files.
+2.  **API Schema Special Character Stress Tests:** Execute edge validation loops passing mixed punctuation formatting values and Unicode character arrays into parameters to analyze backend sanitization boundaries.
+3.  **Frontend Offline Network Caching Check:** Simulate sudden network disconnect drops on phone detail view paths to evaluate application fallback resilience.
