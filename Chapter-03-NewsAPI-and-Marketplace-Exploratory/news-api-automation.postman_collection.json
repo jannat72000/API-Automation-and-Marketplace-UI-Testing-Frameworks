@@ -1,0 +1,508 @@
+{
+  "info": {
+    "_postman_id": "cd77de09-9fde-422c-929d-9f0f06857c54",
+    "name": "News API - Assessment Environment",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58732262",
+    "_collection_link": "https://go.postman.co/collection/58732262-cd77de09-9fde-422c-929d-9f0f06857c54?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "TC-NEWS-01: Search articles",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// 1. HTTP Status & Content-Type Validation\r",
+              "pm.test(\"Status code is 200 OK\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Content-Type is JSON format\", function () {\r",
+              "    pm.response.to.have.header(\"Content-Type\", \"application/json; charset=utf-8\");\r",
+              "});\r",
+              "\r",
+              "const jsonData = pm.response.json();\r",
+              "\r",
+              "// 2. Response Envelope Validation\r",
+              "pm.test(\"Root status field equals 'ok'\", function () {\r",
+              "    pm.expect(jsonData.status).to.eql(\"ok\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Articles structure is an array and totalResults is non-negative\", function () {\r",
+              "    pm.expect(jsonData.articles).to.be.an('array');\r",
+              "    pm.expect(jsonData.totalResults).to.be.a('number');\r",
+              "    pm.expect(jsonData.totalResults).to.be.at.least(0);\r",
+              "});\r",
+              "\r",
+              "// 3. Representative Fields Validation (Resilient to live data changes)\r",
+              "pm.test(\"Representative item fields are present inside the articles array\", function () {\r",
+              "    if (jsonData.articles.length > 0) {\r",
+              "        // Evaluate the schema properties of the first element in the dynamic array\r",
+              "        const standardArticle = jsonData.articles[0];\r",
+              "        pm.expect(standardArticle).to.have.property('title');\r",
+              "        pm.expect(standardArticle).to.have.property('url');\r",
+              "        pm.expect(standardArticle).to.have.property('publishedAt');\r",
+              "    }\r",
+              "});\r",
+              "\r",
+              "// 4. Performance Metrics Observation (Labelled as an environment assumption profile)\r",
+              "pm.test(\"Response latency is within acceptable range\", function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://newsapi.org/v2/everything?q=technology",
+          "protocol": "https",
+          "host": [
+            "newsapi",
+            "org"
+          ],
+          "path": [
+            "v2",
+            "everything"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "technology"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-NEWS-02: Top headlines",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// 1. Validate Transaction Network and Content Context\r",
+              "pm.test(\"Status code is 200 OK\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Content-Type matches JSON API schema specs\", function () {\r",
+              "    pm.response.to.have.header(\"Content-Type\", \"application/json; charset=utf-8\");\r",
+              "});\r",
+              "\r",
+              "const jsonData = pm.response.json();\r",
+              "\r",
+              "// 2. Validate Successful Success Envelope Boundaries\r",
+              "pm.test(\"Response status confirms successful resolution\", function () {\r",
+              "    pm.expect(jsonData.status).to.eql(\"ok\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Headlines object resolves to an active array wrapper\", function () {\r",
+              "    pm.expect(jsonData.articles).to.be.an('array');\r",
+              "    pm.expect(jsonData.totalResults).to.be.a('number');\r",
+              "    pm.expect(jsonData.totalResults).to.be.at.least(0);\r",
+              "});\r",
+              "\r",
+              "// 3. Verify Inner Record Field Layouts Without Hardcoding Brittle Counts\r",
+              "pm.test(\"Articles data nodes match contract property structure\", function () {\r",
+              "    if (jsonData.articles.length > 0) {\r",
+              "        const standardArticle = jsonData.articles[0];\r",
+              "        pm.expect(standardArticle).to.have.property('title');\r",
+              "        pm.expect(standardArticle).to.have.property('url');\r",
+              "        pm.expect(standardArticle).to.have.property('publishedAt');\r",
+              "    }\r",
+              "});\r",
+              "\r",
+              "// 4. Track System Performance Metrics\r",
+              "pm.test(\"Response latency operates within accepted team assumptions\", function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://newsapi.org/v2/top-headlines?country=us",
+          "protocol": "https",
+          "host": [
+            "newsapi",
+            "org"
+          ],
+          "path": [
+            "v2",
+            "top-headlines"
+          ],
+          "query": [
+            {
+              "key": "country",
+              "value": "us"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-NEWS-03 - Missing API key",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 401 Unauthorized\", function () {\r",
+              "    pm.response.to.have.status(401);\r",
+              "});\r",
+              "\r",
+              "const jsonData = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Error response contains standard error status\", function () {\r",
+              "    pm.expect(jsonData.status).to.eql(\"error\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Error payload returns useful code and message descriptions\", function () {\r",
+              "    pm.expect(jsonData.code).to.eql(\"apiKeyMissing\");\r",
+              "    pm.expect(jsonData.message).to.be.a('string');\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://newsapi.org/v2/everything?q=bitcoin",
+          "protocol": "https",
+          "host": [
+            "newsapi",
+            "org"
+          ],
+          "path": [
+            "v2",
+            "everything"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "bitcoin"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-NEWS-04 - Invalid API key",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 401 Unauthorized\", function () {\r",
+              "    pm.response.to.have.status(401);\r",
+              "});\r",
+              "\r",
+              "const jsonData = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Error response contains standard error status\", function () {\r",
+              "    pm.expect(jsonData.status).to.eql(\"error\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Error payload returns invalid key code and description\", function () {\r",
+              "    pm.expect(jsonData.code).to.eql(\"apiKeyInvalid\");\r",
+              "    pm.expect(jsonData.message).to.be.a('string');\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "apikey",
+          "apikey": [
+            {
+              "key": "value",
+              "value": "{{auth_secret_15dl}}",
+              "type": "string"
+            },
+            {
+              "key": "in",
+              "value": "header",
+              "type": "string"
+            },
+            {
+              "key": "key",
+              "value": "X-Api-Key",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://newsapi.org/v2/everything?q=bitcoin",
+          "protocol": "https",
+          "host": [
+            "newsapi",
+            "org"
+          ],
+          "path": [
+            "v2",
+            "everything"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "bitcoin"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-NEWS-05 - Missing required search parameter",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400 Bad Request\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "const jsonData = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Error response contains standard error status\", function () {\r",
+              "    pm.expect(jsonData.status).to.eql(\"error\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Error payload returns parameters missing code and description\", function () {\r",
+              "    pm.expect(jsonData.code).to.eql(\"parametersMissing\");\r",
+              "    pm.expect(jsonData.message).to.be.a('string');\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://newsapi.org/v2/everything",
+          "protocol": "https",
+          "host": [
+            "newsapi",
+            "org"
+          ],
+          "path": [
+            "v2",
+            "everything"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-NEWS-06: Invalid parameter",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400 Bad Request\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "const jsonData = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Error response contains standard error status\", function () {\r",
+              "    pm.expect(jsonData.status).to.eql(\"error\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Error payload returns parameter invalid code and description\", function () {\r",
+              "    pm.expect(jsonData.code).to.eql(\"parameterInvalid\");\r",
+              "    pm.expect(jsonData.message).to.be.a('string');\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://newsapi.org/v2/everything?q=apple&sortBy=invalidSortParam",
+          "protocol": "https",
+          "host": [
+            "newsapi",
+            "org"
+          ],
+          "path": [
+            "v2",
+            "everything"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "apple"
+            },
+            {
+              "key": "sortBy",
+              "value": "invalidSortParam"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-NEWS-07 - Valid Sources Fetch",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Content-Type is valid JSON application\", function () {\r",
+              "    pm.response.to.have.header(\"Content-Type\", \"application/json; charset=utf-8\");\r",
+              "});\r",
+              "\r",
+              "const jsonData = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response status indicator key is ok\", function () {\r",
+              "    pm.expect(jsonData.status).to.eql(\"ok\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Sources structure resolves to a valid JSON data array\", function () {\r",
+              "    pm.expect(jsonData.sources).to.be.an('array');\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Individual channel structures hold core resource keys\", function () {\r",
+              "    if (jsonData.sources.length > 0) {\r",
+              "        const standardSource = jsonData.sources[0];\r",
+              "        pm.expect(standardSource).to.have.property('id');\r",
+              "        pm.expect(standardSource).to.have.property('name');\r",
+              "        pm.expect(standardSource).to.have.property('url');\r",
+              "    }\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://newsapi.org/v2/top-headlines/sources",
+          "protocol": "https",
+          "host": [
+            "newsapi",
+            "org"
+          ],
+          "path": [
+            "v2",
+            "top-headlines",
+            "sources"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "value",
+        "value": "{{newsApiKey}}",
+        "type": "string"
+      },
+      {
+        "key": "key",
+        "value": "X-Api-Key",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "auth_secret_15dl",
+      "secret": true,
+      "source": {
+        "provider": "postman",
+        "postman": {
+          "type": "cloud",
+          "secretId": "c7d56035-985c-4d34-be44-cc253e0ced52",
+          "vaultId": "c3538310-f31a-4656-86d8-f42a858c9e16"
+        }
+      }
+    }
+  ]
+}
