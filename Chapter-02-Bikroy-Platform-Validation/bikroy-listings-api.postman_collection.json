@@ -1,0 +1,521 @@
+{
+  "info": {
+    "_postman_id": "740be352-2667-44f2-911d-5089f1a8b6fd",
+    "name": "Bikroy Listings API - QA Junior Assesment",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58732262",
+    "_collection_link": "https://go.postman.co/collection/58732262-740be352-2667-44f2-911d-5089f1a8b6fd?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "TC-BIK-01- Successful Search & Filters",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// 1. Assert Status Code & Content Type\r\npm.test(\"Status code is 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Content-Type is JSON\", function () {\r\n    pm.response.to.have.header(\"Content-Type\", \"application/json\");\r\n});\r\n\r\n// 2. Validate Response Envelope Structure & Data Types\r\npm.test(\"Response contains valid envelope structure and types\", function () {\r\n    const jsonData = pm.response.json();\r\n    \r\n    pm.expect(jsonData).to.be.an('object');\r\n    pm.expect(jsonData.items).to.be.an('array');\r\n    pm.expect(jsonData.page).to.be.a('number');\r\n    pm.expect(jsonData.limit).to.be.a('number');\r\n    pm.expect(jsonData.total).to.be.a('number');\r\n});\r\n\r\n// 3. Dynamic Schema Validation for Array Items\r\npm.test(\"Each listing item has valid properties and schema types\", function () {\r\n    const jsonData = pm.response.json();\r\n    \r\n    jsonData.items.forEach(function(item) {\r\n        pm.expect(item.id).to.be.a('string');\r\n        pm.expect(item.title).to.be.a('string');\r\n        pm.expect(item.location).to.be.a('string');\r\n        pm.expect(item.category).to.be.a('string');\r\n        pm.expect(item.url).to.be.a('string');\r\n        \r\n        // Price and Condition can be null or specific types according to contract\r\n        if (item.price !== null) {\r\n            pm.expect(item.price).to.be.a('number');\r\n        }\r\n        if (item.condition !== null) {\r\n            pm.expect(item.condition).to.be.a('string');\r\n        }\r\n    });\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/listings?q=laptop",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "listings"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "laptop"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-BIK-02- Filter or search by location and category",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Returned listings strictly match applied environment filters\", function () {\r\n    const jsonData = pm.response.json();\r\n    const expectedLocation = pm.environment.get(\"location\");\r\n    const expectedCategory = pm.environment.get(\"category\");\r\n\r\n    jsonData.items.forEach(function(item) {\r\n        pm.expect(item.location).to.eql(expectedLocation);\r\n        pm.expect(item.category).to.eql(expectedCategory);\r\n    });\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/listings?q=phone&location={{location}}&category={{category}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "listings"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "phone"
+            },
+            {
+              "key": "location",
+              "value": "{{location}}"
+            },
+            {
+              "key": "category",
+              "value": "{{category}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-BIK-03- Pagination Handling",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response metadata matches pagination limits\", function () {\r\n    const jsonData = pm.response.json();\r\n    \r\n    pm.expect(jsonData.page).to.eql(1);\r\n    pm.expect(jsonData.limit).to.eql(5);\r\n    pm.expect(jsonData.items.length).to.be.at.most(5); \r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/listings?q=electronics&page=1&limit=5",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "listings"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "electronics"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "5"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-BIK-04-  Empty Results Handling",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200 OK for clean empty states\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Returns correct empty-state envelope structure\", function () {\r\n    const jsonData = pm.response.json();\r\n    \r\n    pm.expect(jsonData.items).to.be.an('array').that.is.empty;\r\n    pm.expect(jsonData.total).to.eql(0);\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/listings?q=xyznonexistentterm123",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "listings"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "xyznonexistentterm123"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-BIK-05- Validation Errors - Missing Parameter",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 400 Bad Request\", function () {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"Error response body provides meaningful feedback\", function () {\r\n    const jsonData = pm.response.json();\r\n    \r\n    pm.expect(jsonData).to.have.property('error');S\r\n    pm.expect(jsonData.error.code).to.be.a('string');\r\n    pm.expect(jsonData.error.message).to.be.a('string');\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/listings",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "listings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-BIK-06- Validation Errors - Invalid Limit",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 400 Bad Request\", function () {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"Error response body provides meaningful feedback\", function () {\r\n    const jsonData = pm.response.json();\r\n    \r\n    pm.expect(jsonData).to.have.property('error');\r\n    pm.expect(jsonData.error.code).to.be.a('string');\r\n    pm.expect(jsonData.error.message).to.be.a('string');\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/listings?q=car&limit=100",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "listings"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "car"
+            },
+            {
+              "key": "limit",
+              "value": "100"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-BIK-07- Unauthenticated Request",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200 OK (No Auth Required per contract)\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Content-Type is JSON\", function () {\r\n    pm.response.to.have.header(\"Content-Type\", \"application/json\");\r\n});\r\n\r\npm.test(\"Request header does not contain Authorization\", function () {\r\n    pm.expect(pm.request.headers.has(\"Authorization\")).to.be.false;\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/listings?q=test",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "listings"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "test"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-BIK-08-Valid Listing Detail",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Detail response has exact expected asset properties\", function () {\r\n    const jsonData = pm.response.json();\r\n    const targetId = pm.environment.get(\"validListingId\");\r\n    \r\n    pm.expect(jsonData.id).to.eql(targetId);\r\n    pm.expect(jsonData).to.include.keys([\r\n        'id', 'title', 'description', 'price', \r\n        'location', 'category', 'condition', 'url'\r\n    ]);\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/listings/{{validListingId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "listings",
+            "{{validListingId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-BIK-09- Invalid Listing Detail",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 404 Not Found\", function () {\r\n    pm.response.to.have.status(404);\r\n});\r\n\r\npm.test(\"Standard error structure is retained on 404\", function () {\r\n    const jsonData = pm.response.json();\r\n    \r\n    pm.expect(jsonData.error).to.exist;\r\n    pm.expect(jsonData.error.code).to.be.a('string');\r\n    pm.expect(jsonData.error.message).to.be.a('string');\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/listings/{{invalidListingId}})",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "listings",
+            "{{invalidListingId}})"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-BIK-EXP-01- Bangla Language Search",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200 OK for Unicode Queries\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Content-Type is valid JSON\", function () {\r\n    pm.response.to.have.header(\"Content-Type\", \"application/json\");\r\n});\r\n\r\npm.test(\"Response contains dynamic items array\", function () {\r\n    const jsonData = pm.response.json();\r\n    pm.expect(jsonData.items).to.be.an('array');\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/listings?q=পুরাতন মোবাইল",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "listings"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "পুরাতন মোবাইল"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-BIK-EXP-02- Whitespace Search",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Server responds gracefully to whitespace strings\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([200, 400]);\r\n});\r\n\r\npm.test(\"Response body does not contain internal server breakdown errors\", function () {\r\n    const responseText = pm.response.text();\r\n    pm.expect(responseText).to.not.include(\"Internal Server Error\");\r\n    pm.expect(responseText).to.not.include(\"Exception\");\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/listings?q=   ",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "listings"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "   "
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-BIK-EXP-03- Extreme Short Search",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Server safely processes or rejects single character input\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([200, 400]);\r\n});\r\n\r\npm.test(\"Valid envelope structure if request accepted\", function () {\r\n    if (pm.response.code === 200) {\r\n        const jsonData = pm.response.json();\r\n        pm.expect(jsonData.items).to.be.an('array');\r\n    }\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/listings?q=x",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "listings"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "x"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-BIK-EXP-04- Pagination Max Boundary",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Items array length strictly respects the upper boundary of 50\", function () {\r\n    const jsonData = pm.response.json();\r\n    pm.expect(jsonData.items.length).to.be.at.most(50);\r\n});\r\n\r\npm.test(\"Pagination limit metadata matches request\", function () {\r\n    const jsonData = pm.response.json();\r\n    pm.expect(jsonData.limit).to.eql(50);\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/listings?q=phone&page=1&limit=50",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "listings"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "phone"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "50"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC-BIK-EXP-05- Repeated Parameters",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Server safely manages or rejects parameter pollution variants\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([200, 400]);\r\n});\r\n\r\npm.test(\"System did not trigger database stack dump errors\", function () {\r\n    const responseText = pm.response.text();\r\n    pm.expect(responseText).to.not.include(\"SQL syntax\");\r\n    pm.expect(responseText).to.not.include(\"Unhandled rejection\");\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/listings?q=phone&limit=10&limit=5",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "listings"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "phone"
+            },
+            {
+              "key": "limit",
+              "value": "10"
+            },
+            {
+              "key": "limit",
+              "value": "5"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
